@@ -1,1 +1,3 @@
 org\puerta\sslserver\SSLServer.class
+org\puerta\sslserver\TokenManager.class
+org\puerta\sslserver\ClientHandler.class

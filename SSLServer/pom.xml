@@ -10,4 +10,12 @@
         <maven.compiler.release>23</maven.compiler.release>
         <exec.mainClass>org.puerta.sslserver.SSLServer</exec.mainClass>
     </properties>
+    <dependencies>
+        <dependency>
+            <groupId>com.auth0</groupId>
+            <artifactId>java-jwt</artifactId>
+            <version>4.4.0</version>
+        </dependency>
+    </dependencies>
+   
 </project>

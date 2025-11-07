@@ -12,7 +12,10 @@ import java.util.Map;
 public class SSLServer {
 
     private static final Map<String, String> USER_DATABASE = new HashMap<>();
-    private static final Map<String, Boolean> ACTIVE_SESSIONS = new HashMap<>();
+
+    // Usa un secreto fuerte y no lo hardcodees en produccion, pero aqui no es produccion.
+    // Léelo de variables de entorno o un archivo de configuración, .env normalmente.
+    private static final String JWT_SECRET = "mi-clave-secreta-para-firmar-tokens-jwt-muy-larga-y-segura-y-puro-ct";
 
     static {
         USER_DATABASE.put("admin", "admin123");
@@ -33,7 +36,7 @@ public class SSLServer {
         // No requerimos autenticacion del certificado del cliente 
         serverSocket.setNeedClientAuth(false);
 
-        System.out.println("SSL Server iniciado en el puerto " + port + " y listo para recibir clientes.");
+        System.out.println("SSL Server (JWT) iniciado en el puerto " + port);
 
         while (true) {
             try {
@@ -42,7 +45,8 @@ public class SSLServer {
                 System.out.println("Client conectado: " + socket.getInetAddress().getHostAddress() + ":" + socket.getPort());
 
                 // Crea y arranca un nuevo hilo para manejar la sesion del cliente
-                ClientHandler clientHandler = new ClientHandler(socket, USER_DATABASE, ACTIVE_SESSIONS);
+                // Ya no pasamos el mapa de sesiones, pasamos el secreto JWT
+                ClientHandler clientHandler = new ClientHandler(socket, USER_DATABASE, JWT_SECRET);
                 clientHandler.start();
 
             } catch (IOException e) {
@@ -51,4 +55,3 @@ public class SSLServer {
         }
     }
 }
-
