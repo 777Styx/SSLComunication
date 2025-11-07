@@ -5,7 +5,7 @@ import java.io.*;
 
 /**
  *
- * @author julli
+ * @author 777Styx
  */
 public class SSLServer {
 

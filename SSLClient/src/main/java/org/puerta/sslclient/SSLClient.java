@@ -6,7 +6,7 @@ import java.util.Scanner;
 
 /**
  *
- * @author julli
+ * @author 777Styx
  */
 public class SSLClient {
 
