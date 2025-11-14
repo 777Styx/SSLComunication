@@ -11,9 +11,10 @@ import java.util.Map;
  */
 public class SSLServer {
 
-    private static final Map<String, String> USER_DATABASE = new HashMap<>();
-    private static final Map<String, Boolean> ACTIVE_SESSIONS = new HashMap<>();
+    private static final Map<String, String> USER_DATABASE = new HashMap<>(); //Base de datos de usuarios
+    private static final Map<String, Boolean> ACTIVE_SESSIONS = new HashMap<>(); //mantiene las sesiones activas
 
+    //inicializar la base de datos de usuarios
     static {
         USER_DATABASE.put("admin", "admin123");
         USER_DATABASE.put("Styx", "password");
@@ -51,4 +52,3 @@ public class SSLServer {
         }
     }
 }
-
