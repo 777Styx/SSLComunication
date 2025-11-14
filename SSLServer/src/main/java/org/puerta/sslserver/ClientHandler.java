@@ -12,13 +12,14 @@ public class ClientHandler extends Thread {
 
     private final Socket clientSocket;
     private final Map<String, String> userDatabase; // {username: password}
-    private final String jwtSecret;
+    private final String jwtSecret; //Secreto utilizado para firmar y validar tokens JWT.
     private final String clientIdentifier;
     private BufferedReader in;
     private PrintWriter out;
     private String username = "Invitado"; // Solo para logging
 
-    // Constructor actualizado: recibe el secreto JWT, no el mapa de sesiones
+    //  recibe el secreto JWT, no el mapa de sesiones
+    //Genera el identificador del cliente usando su IP y puerto.
     public ClientHandler(Socket socket, Map<String, String> db, String secret) {
         this.clientSocket = socket;
         this.userDatabase = db;
@@ -26,9 +27,16 @@ public class ClientHandler extends Thread {
         this.clientIdentifier = socket.getInetAddress().getHostAddress() + ":" + socket.getPort();
     }
 
+    /**
+     * Configura flujos de entrada/salida Envía mensaje de bienvenida e
+     * instrucciones Espera comandos del cliente en un bucle
+     *
+     * Clasifica los comandos: /login /logout Otros: estos requieren token
+     */
     @Override
     public void run() {
         try {
+            //para lectura y escritura
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
@@ -36,10 +44,12 @@ public class ClientHandler extends Thread {
             out.println("Para otros comandos, usa el formato: [token] [comando]");
 
             String clientMessage;
+            //Flujo general
             while ((clientMessage = in.readLine()) != null) {
                 System.out.println("[" + username + " - " + clientIdentifier + "] Mensaje recibido: " + clientMessage);
 
                 if (clientMessage.startsWith("/login ")) {
+                    //Aqui se maneja la autenticacion
                     handleLogin(clientMessage);
                 } else if (clientMessage.equals("/logout")) {
                     handleLogout();
@@ -53,16 +63,21 @@ public class ClientHandler extends Thread {
             System.out.println("[" + username + "] Conexion perdida: " + e.getMessage());
         } finally {
             try {
-                // Limpieza al cerrar la conexion
                 clientSocket.close();
                 System.out.println("Sesion de [" + username + "] terminada.");
             } catch (IOException e) {
-                // ignore
+
             }
         }
     }
 
-    // Logica para manejar el comando /login
+    /**
+     * Logica para manejar el comando /login, 
+     * Valida que el comando tenga exactamente 3 partes 
+     * Busca el usuario en la base de datos
+     * Genera un JWT usando TokenManager.generateToken
+     * 
+     */
     private void handleLogin(String command) {
         String[] parts = command.split(" ");
         if (parts.length != 3) {
@@ -91,7 +106,8 @@ public class ClientHandler extends Thread {
         }
     }
 
-    // Logica para manejar el comando /logout
+    // Este servidor es stateless, por lo que el token no se invalida en servidor,
+    //solo se indica al cliente que lo borre
     private void handleLogout() {
         // En un sistema stateless, el "logout" real ocurre en el cliente
         // (el cliente simplemente borra su token).
@@ -100,7 +116,7 @@ public class ClientHandler extends Thread {
         this.username = "Invitado";
     }
 
-    // CONTROL DE ACCESO (Autorizacion) 
+    // CONTROL DE ACCESO, si el mensaje no cumple el formato, rechazo inmediato
     private void handleCommand(String clientMessage) {
         // El formato esperado es: "[token] [comando]"
         String[] parts = clientMessage.split(" ", 2);
@@ -113,7 +129,8 @@ public class ClientHandler extends Thread {
         String token = parts[0];
         String actualCommand = parts[1];
 
-        // Validar el token
+        // Si es válido, devuelve el nombre de usuario contenido en el token.
+        //Si es invalido, retorna null, acceso denegado.
         String userFromToken = TokenManager.validateToken(token, jwtSecret);
 
         if (userFromToken != null) {

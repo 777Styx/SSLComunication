@@ -16,7 +16,7 @@ public class TokenManager {
     /**
      * Genera un token JWT para un usuario.
      *
-     * @param username El nombre de usuario (subject) del token.
+     * @param username El nombre de usuario del token.
      * @param secret La clave secreta para firmar el token.
      * @return El token JWT como un String.
      */
@@ -37,7 +37,7 @@ public class TokenManager {
     }
 
     /**
-     * Valida un token JWT y devuelve el nombre de usuario (subject) si es
+     * Valida un token JWT y devuelve el nombre de usuario si es
      * válido.
      *
      * @param token El token JWT a validar.
