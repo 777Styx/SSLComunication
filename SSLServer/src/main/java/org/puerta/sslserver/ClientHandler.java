@@ -1,8 +1,12 @@
 package org.puerta.sslserver;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.net.Socket;
 import java.util.Map;
+import org.apache.logging.log4j.LogManager;
 
 /**
  * Hilo encargado de gestionar la comunicación con un único cliente conectado al
@@ -11,6 +15,8 @@ import java.util.Map;
  * @author 777Styx
  */
 public class ClientHandler extends Thread {
+
+    private static final Logger logger = LogManager.getLogger(ClientHandler.class);
 
     private final Socket clientSocket;
     private final Map<String, String> userDatabase; // {username: password}
@@ -43,7 +49,7 @@ public class ClientHandler extends Thread {
     public void run() {
         try {
 
-            // flujos de comunicación del socket
+            // flujos de comunicacion del socket
             in = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             out = new PrintWriter(clientSocket.getOutputStream(), true);
 
@@ -64,14 +70,15 @@ public class ClientHandler extends Thread {
                 }
             }
         } catch (IOException e) {
-            System.out.println("[" + username + "] Conexion perdida: " + e.getMessage());
+            logger.warn("[{}] Conexion perdida : {}", username, e.getMessage());
         } finally {
             try {
                 // Limpieza al cerrar la conexion, se elimina el mapa 
                 activeSessions.remove(clientIdentifier);
                 clientSocket.close();
-                System.out.println("Sesion de [" + username + "] terminada.");
+                logger.info("[{}] Sesion finalizada y socket cerrado.", username);
             } catch (IOException e) {
+                logger.error("Error cerrando socket", e);
             }
         }
     }
@@ -85,6 +92,7 @@ public class ClientHandler extends Thread {
         //Evita que un usuario ya autenticado vuelva a intentar loguearse
         if (isAuthenticated) {
             out.println("Ya estas autenticado como " + username + ".");
+            logger.warn("[{}] Intento de re-login detectado (sospechoso).", username);
             return;
         }
 
@@ -92,28 +100,36 @@ public class ClientHandler extends Thread {
         String[] parts = command.split(" ");
         if (parts.length != 3) {
             out.println("Uso: /login [usuario] [contraseña]");
+            logger.warn("[{}] Formato de login incorrecto recibido.", clientIdentifier);
             return;
         }
 
         String user = parts[1];
         String pass = parts[2];
 
+        // SEGURIDAD: NUNCA loguear la contraseña ('pass') en texto plano.
         // Autenticacion simple (en un proyecto real usarías hashing o usa el que se ha visto previamente)
         if (userDatabase.containsKey(user) && userDatabase.get(user).equals(pass)) {
-
             isAuthenticated = true; // Marcamos la sesion como autenticada
             username = user;// Actualizamos el nombre de usuario
             activeSessions.put(clientIdentifier, true);   // Actualizamos el estado de sesión en el mapa
             out.println("Autenticacion exitosa." + username + "!");
+
+            // LOG: Exito - critico
+            logger.info("LOGIN EXITOSO: Usuario '{}' autenticado desde IP {}", user, clientIdentifier);
         } else {
             out.println("Error de autenticacion. Usuario o contraseña incorrectos.");
+
+            // LOG: Fallo de seguridad (Importante para detectar Fuerza Bruta)
+            logger.warn("LOGIN FALLIDO: Intento para usuario '{}' desde IP {}", user, clientIdentifier);
         }
     }
 
-    // Cierra la sesión y restablece el estado.
+    // Cierra la sesion y restablece el estado.
     private void handleLogout() {
         if (isAuthenticated) {
             out.println("Cerrando sesion de " + username + ".");
+            logger.info("LOGOUT: Usuario '{}' cerró sesión voluntariamente.", username);
         } else {
             out.println("No estabas autenticado.");
         }
@@ -125,19 +141,23 @@ public class ClientHandler extends Thread {
         activeSessions.put(clientIdentifier, false);
     }
 
-    // Lógica de CONTROL DE ACCESO (Autorizacion)
+    // Logica de CONTROL DE ACCESO (Autorizacion)
     /**
      *
      * @param command
      */
     private void handleCommand(String command) {
         if (isAuthenticated) {
-            // Lógica si el usuario está autenticado
+            // Logica si el usuario está autenticado
             out.println("Mensaje recibido de " + username + ": " + command);
 
+            // LOG: Auditoría de acciones (Quién hizo qué)
+            logger.info("ACCION: Usuario '{}' ejecutó comando/mensaje: '{}'", username, command);
         } else {
             // Lógica si el usuario NO está autenticado
             out.println("ACCESO DENEGADO. Debes autenticarte para realizar acciones. Usa /login [usuario] [contraseña]");
+            // LOG: Intento de acceso no autorizado
+            logger.warn("ACCESO DENEGADO: IP {} intentó ejecutar comandos sin autenticación.", clientIdentifier);
         }
     }
 }
