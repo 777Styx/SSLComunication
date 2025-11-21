@@ -1,0 +1,13 @@
+2025-11-21 01:04:24 [main] INFO  org.puerta.sslserver.SSLServer - SSL Server INICIADO en el puerto 65432
+2025-11-21 01:04:24 [main] INFO  org.puerta.sslserver.SSLServer - Esperando clientes...
+2025-11-21 01:04:27 [main] INFO  org.puerta.sslserver.SSLServer - NUEVA CONEXION entrante desde: 127.0.0.1:50266
+2025-11-21 01:04:36 [Thread-0] INFO  org.puerta.sslserver.ClientHandler - LOGIN EXITOSO: Usuario 'admin' autenticado desde IP 127.0.0.1:50266
+2025-11-21 01:04:37 [Thread-0] INFO  org.puerta.sslserver.ClientHandler - ACCION: Usuario 'admin' ejecutó comando/mensaje: 'HEllo '
+2025-11-21 01:04:39 [Thread-0] INFO  org.puerta.sslserver.ClientHandler - ACCION: Usuario 'admin' ejecutó comando/mensaje: 'hi'
+2025-11-21 01:04:44 [Thread-0] INFO  org.puerta.sslserver.ClientHandler - LOGOUT: Usuario 'admin' cerró sesión voluntariamente.
+2025-11-21 01:04:44 [Thread-0] INFO  org.puerta.sslserver.ClientHandler - [Invitado] Sesion finalizada y socket cerrado.
+2025-11-21 01:05:19 [main] INFO  org.puerta.sslserver.SSLServer - NUEVA CONEXION entrante desde: 127.0.0.1:56717
+2025-11-21 01:05:46 [Thread-1] INFO  org.puerta.sslserver.ClientHandler - LOGIN EXITOSO: Usuario 'Styx' autenticado desde IP 127.0.0.1:56717
+2025-11-21 01:06:02 [Thread-1] INFO  org.puerta.sslserver.ClientHandler - ACCION: Usuario 'Styx' ejecutó comando/mensaje: 'Bye im quitting'
+2025-11-21 01:06:06 [Thread-1] INFO  org.puerta.sslserver.ClientHandler - LOGOUT: Usuario 'Styx' cerró sesión voluntariamente.
+2025-11-21 01:06:06 [Thread-1] INFO  org.puerta.sslserver.ClientHandler - [Invitado] Sesion finalizada y socket cerrado.
